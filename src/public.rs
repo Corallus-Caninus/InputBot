@@ -6,6 +6,20 @@ pub enum BlockInput {
     DontBlock,
 }
 
+//TODO: we are adding these enumerations
+// MouseKeyUpperLeft => 0x12C,
+// MouseKeyUp => 0x12D,
+// MouseKeyUpperRight => 0x12E,
+// MouseKeyHistoryForward => 0x12F,
+// MouseKeyLeft => 0x130,
+// MouseKeyMiddle => 0x131,
+// MouseKeyRight => 0x132,
+// MouseKeyHistoryBack => 0x133,
+// MouseKeyLowerLeft => 0x134,
+// MouseKeyDown => 0x135,
+// MouseKeyLowerRight => 0x136,
+// MouseKeyFastToggle => 0x137,
+// MouseKeyClickToggle => 0x138
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 pub enum KeybdKey {
     BackspaceKey,
@@ -98,6 +112,25 @@ pub enum KeybdKey {
     RShiftKey,
     LControlKey,
     RControlKey,
+    MouseKeyUpperLeft,
+    MouseKeyUp,
+    MouseKeyUpperRight,
+    MouseKeyHistoryForward,
+    MouseKeyLeft,
+    MouseKeyMiddle,
+    MouseKeyRight,
+    MouseKeyHistoryBack,
+    MouseKeyLowerLeft,
+    MouseKeyDown,
+    MouseKeyLowerRight,
+    MouseKeyFastToggle,
+    MouseKeyClickToggle,
+    LAltKey,
+    RAltKey,
+    LWinKey,
+    RWinKey,
+    MenuKey,
+    HelpKey,
     OtherKey(u64),
 }
 

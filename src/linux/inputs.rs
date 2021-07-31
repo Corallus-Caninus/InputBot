@@ -3,6 +3,59 @@ use crate::public::{
     MouseButton::{self, *},
 };
 
+//TODO: these are the keys we are adding:
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 79 = KP_Home 300 KP_Home 300'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 80 = KP_Up 301 KP_Up 301'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 81 = KP_Prior 302 KP_Prior 302'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 82 = KP_Subtract 303 KP_Subtract 303'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 83 = KP_Left 304 KP_Left 304'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 84 = KP_Begin 305 KP_Begin 305'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 85 = KP_Right 306 KP_Right 306'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 86 = KP_Add 307 KP_Add 307'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 87 = KP_End 308 KP_End 308'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 88 = KP_Down 309 KP_Down 309'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 89 = KP_Next 310 KP_Next 310'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 90 = KP_Insert 311 KP_Insert 311'"])
+//.output()
+//.unwrap();
+//std::process::Command::new("xmodmap")
+//.args(&["-e", "'keycode 91 = KP_Delete 312 KP_Delete 312'"])
+//.output()
+//.unwrap();
 impl From<KeybdKey> for u64 {
     fn from(key: KeybdKey) -> u64 {
         match key {
@@ -54,6 +107,20 @@ impl From<KeybdKey> for u64 {
             XKey => 0x058,
             YKey => 0x059,
             ZKey => 0x05A,
+            MouseKeyUpperLeft => 0x12C,
+            MouseKeyUp => 0x12D,
+            MouseKeyUpperRight => 0x12E,
+            MouseKeyHistoryForward => 0x12F,
+            MouseKeyLeft => 0x130,
+            MouseKeyMiddle => 0x131,
+            MouseKeyRight => 0x132,
+            MouseKeyHistoryBack => 0x133,
+            MouseKeyLowerLeft => 0x134,
+            MouseKeyDown => 0x135,
+            MouseKeyLowerRight => 0x136,
+            MouseKeyFastToggle => 0x137,
+            MouseKeyClickToggle => 0x138,
+
             Numpad0Key => 0xFFB0,
             Numpad1Key => 0xFFB1,
             Numpad2Key => 0xFFB2,
@@ -96,6 +163,10 @@ impl From<KeybdKey> for u64 {
             RShiftKey => 0xFFE2,
             LControlKey => 0xFFE3,
             RControlKey => 0xFFE4,
+            //TODO: these are guessed by copilot and are likely wrong
+            RaltKey => 0xFFE9,
+            LaltKey => 0xFFEA,
+            LWinKey => 0xFFEB,
             OtherKey(keycode) => keycode,
         }
     }
@@ -135,13 +206,14 @@ pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
         0x1c => Some(EnterKey),
         0x01 => Some(EscapeKey),
         0x39 => Some(SpaceKey),
-        0x47 => Some(HomeKey),
-        0x4b => Some(LeftKey),
-        0x48 => Some(UpKey),
-        0x4d => Some(RightKey),
-        0x50 => Some(DownKey),
-        0x52 => Some(InsertKey),
-        0x53 => Some(DeleteKey),
+        //NOTE: these can be used instead of custom MouseKey handles in scancodes
+        //0x47 => Some(HomeKey),
+        // 0x4b => Some(LeftKey),
+        // 0x48 => Some(UpKey),
+        // 0x4d => Some(RightKey),
+        // 0x50 => Some(DownKey),
+        //0x52 => Some(InsertKey),
+        //0x53 => Some(DeleteKey),
         0x0b => Some(Numrow0Key),
         0x02 => Some(Numrow1Key),
         0x03 => Some(Numrow2Key),
@@ -178,16 +250,28 @@ pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
         0x2d => Some(XKey),
         0x15 => Some(YKey),
         0x2c => Some(ZKey),
-        0x52 => Some(Numpad0Key),
-        0x4f => Some(Numpad1Key),
-        0x50 => Some(Numpad2Key),
-        0x51 => Some(Numpad3Key),
-        0x4b => Some(Numpad4Key),
-        0x4c => Some(Numpad5Key),
-        0x4d => Some(Numpad6Key),
-        0x47 => Some(Numpad7Key),
-        0x48 => Some(Numpad8Key),
-        0x49 => Some(Numpad9Key),
+        // 0x52 => Some(Numpad0Key),
+        // 0x4f => Some(Numpad1Key),
+        // 0x50 => Some(Numpad2Key),
+        // 0x51 => Some(Numpad3Key),
+        // 0x4b => Some(Numpad4Key),
+        // 0x4c => Some(Numpad5Key),
+        // 0x4d => Some(Numpad6Key),
+        // 0x47 => Some(Numpad7Key),
+        // 0x48 => Some(Numpad8Key),
+        // 0x49 => Some(Numpad9Key),
+        0x47 => Some(MouseKeyUpperLeft),
+        0x48 => Some(MouseKeyUp),
+        0x49 => Some(MouseKeyUpperRight),
+        0x4b => Some(MouseKeyLeft),
+        0x4c => Some(MouseKeyMiddle),
+        0x4d => Some(MouseKeyRight),
+        0x4f => Some(MouseKeyLowerLeft),
+        0x50 => Some(MouseKeyDown),
+        0x51 => Some(MouseKeyLowerRight),
+        0x52 => Some(MouseKeyFastToggle),
+        0x53 => Some(MouseKeyClickToggle),
+
         0x4e => Some(NumpadPlusKey),
         0x3b => Some(F1Key),
         0x3c => Some(F2Key),
@@ -271,6 +355,17 @@ pub fn key_to_scan_code(key: KeybdKey) -> i32 {
         Numpad8Key => 0x48,
         Numpad9Key => 0x49,
         NumpadPlusKey => 0x4e,
+        MouseKeyUpperLeft => 0x47,
+        MouseKeyUp => 0x48,
+        MouseKeyUpperRight => 0x49,
+        MouseKeyLeft => 0x4b,
+        MouseKeyMiddle => 0x4c,
+        MouseKeyRight => 0x4d,
+        MouseKeyLowerLeft => 0x4f,
+        MouseKeyDown => 0x50,
+        MouseKeyLowerRight => 0x51,
+        MouseKeyFastToggle => 0x52,
+        MouseKeyClickToggle => 0x53,
         F1Key => 0x3b,
         F2Key => 0x3c,
         F3Key => 0x3d,
