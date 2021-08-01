@@ -3,59 +3,6 @@ use crate::public::{
     MouseButton::{self, *},
 };
 
-//TODO: these are the keys we are adding:
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 79 = KP_Home 300 KP_Home 300'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 80 = KP_Up 301 KP_Up 301'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 81 = KP_Prior 302 KP_Prior 302'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 82 = KP_Subtract 303 KP_Subtract 303'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 83 = KP_Left 304 KP_Left 304'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 84 = KP_Begin 305 KP_Begin 305'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 85 = KP_Right 306 KP_Right 306'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 86 = KP_Add 307 KP_Add 307'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 87 = KP_End 308 KP_End 308'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 88 = KP_Down 309 KP_Down 309'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 89 = KP_Next 310 KP_Next 310'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 90 = KP_Insert 311 KP_Insert 311'"])
-//.output()
-//.unwrap();
-//std::process::Command::new("xmodmap")
-//.args(&["-e", "'keycode 91 = KP_Delete 312 KP_Delete 312'"])
-//.output()
-//.unwrap();
 impl From<KeybdKey> for u64 {
     fn from(key: KeybdKey) -> u64 {
         match key {
@@ -344,16 +291,16 @@ pub fn key_to_scan_code(key: KeybdKey) -> i32 {
         XKey => 0x2d,
         YKey => 0x15,
         ZKey => 0x2c,
-        Numpad0Key => 0x52,
-        Numpad1Key => 0x4f,
-        Numpad2Key => 0x50,
-        Numpad3Key => 0x51,
-        Numpad4Key => 0x4b,
-        Numpad5Key => 0x4c,
-        Numpad6Key => 0x4d,
-        Numpad7Key => 0x47,
-        Numpad8Key => 0x48,
-        Numpad9Key => 0x49,
+        // Numpad0Key => 0x52,
+        // Numpad1Key => 0x4f,
+        // Numpad2Key => 0x50,
+        // Numpad3Key => 0x51,
+        // Numpad4Key => 0x4b,
+        // Numpad5Key => 0x4c,
+        // Numpad6Key => 0x4d,
+        // Numpad7Key => 0x47,
+        // Numpad8Key => 0x48,
+        // Numpad9Key => 0x49,
         NumpadPlusKey => 0x4e,
         MouseKeyUpperLeft => 0x47,
         MouseKeyUp => 0x48,
