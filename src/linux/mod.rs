@@ -14,22 +14,24 @@ use nix::{
     sys::stat::Mode,
     unistd::close,
 };
+use once_cell::sync::Lazy;
 use std::{
-    os::{
-        unix::io::RawFd,
-        raw::c_char,
-    },
-    path::Path, thread::sleep, time::Duration, ptr::null, mem::MaybeUninit,
+    mem::MaybeUninit,
+    os::{raw::c_char, unix::io::RawFd},
+    path::Path,
+    ptr::null,
+    thread::sleep,
+    time::Duration,
 };
 use uinput::event::relative::Position;
 use x11::{xlib::*, xtest::*};
-use once_cell::sync::Lazy;
 
 mod inputs;
 
 type ButtonStatesMap = HashMap<MouseButton, bool>;
 
-static BUTTON_STATES: Lazy<Mutex<ButtonStatesMap>> = Lazy::new(|| Mutex::new(ButtonStatesMap::new()));
+static BUTTON_STATES: Lazy<Mutex<ButtonStatesMap>> =
+    Lazy::new(|| Mutex::new(ButtonStatesMap::new()));
 static SEND_DISPLAY: Lazy<AtomicPtr<Display>> = Lazy::new(|| {
     unsafe { XInitThreads() };
     AtomicPtr::new(unsafe { XOpenDisplay(null()) })
@@ -52,6 +54,7 @@ static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
 });
 
 impl KeybdKey {
+    //TODO: misses some right keys 0xe0 xx
     pub fn is_pressed(self) -> bool {
         let code = get_key_code(u64::from(self) as _);
         let mut array: [c_char; 32] = [0; 32];
@@ -59,6 +62,14 @@ impl KeybdKey {
             XQueryKeymap(display, &mut array as *mut [c_char; 32] as *mut c_char);
         });
         array[(code >> 3) as usize] & (1 << (code & 7)) != 0
+    }
+    pub fn is_released(self) -> bool {
+        let code = get_key_code(u64::from(self) as _);
+        let mut array: [c_char; 32] = [0; 32];
+        SEND_DISPLAY.with(|display| unsafe {
+            XQueryKeymap(display, &mut array as *mut [c_char; 32] as *mut c_char);
+        });
+        array[(code >> 3) as usize] & (1 << (code & 7)) == 0
     }
 
     pub fn press(self) {
@@ -68,12 +79,27 @@ impl KeybdKey {
             .write(0x01, key_to_scan_code(self), 1)
             .unwrap();
     }
+    ///press the alternate key for the scancode, usually the right key e.g. right alt
+    pub fn press_right(self) {
+        KEYBD_DEVICE
+            .lock()
+            .unwrap()
+            .write(0xe0, key_to_scan_code(self), 1)
+            .unwrap();
+    }
 
     pub fn release(self) {
         KEYBD_DEVICE
             .lock()
             .unwrap()
             .write(0x01, key_to_scan_code(self), 0)
+            .unwrap();
+    }
+    pub fn release_right(self) {
+        KEYBD_DEVICE
+            .lock()
+            .unwrap()
+            .write(0xe0, key_to_scan_code(self), 0)
             .unwrap();
     }
 
@@ -140,20 +166,20 @@ impl MouseCursor {
 impl MouseWheel {
     pub fn scroll_ver(y: i32) {
         if y < 0 {
-          MouseButton::OtherButton(4).press();
-          MouseButton::OtherButton(4).release();
+            MouseButton::OtherButton(4).press();
+            MouseButton::OtherButton(4).release();
         } else {
-          MouseButton::OtherButton(5).press();
-          MouseButton::OtherButton(5).release();
+            MouseButton::OtherButton(5).press();
+            MouseButton::OtherButton(5).release();
         }
     }
     pub fn scroll_hor(x: i32) {
         if x < 0 {
-          MouseButton::OtherButton(6).press();
-          MouseButton::OtherButton(6).release();
+            MouseButton::OtherButton(6).press();
+            MouseButton::OtherButton(6).release();
         } else {
-          MouseButton::OtherButton(7).press();
-          MouseButton::OtherButton(7).release();
+            MouseButton::OtherButton(7).press();
+            MouseButton::OtherButton(7).release();
         }
     }
 }
@@ -200,8 +226,18 @@ fn handle_input_event(event: Event) {
             let KeyboardEvent::Key(keyboard_key_event) = keyboard_event;
             let key = keyboard_key_event.key();
             if let Some(keybd_key) = scan_code_to_key(key) {
-                if keyboard_key_event.key_state() == KeyState::Pressed {
-                    if let Some(Bind::NormalBind(cb)) = KEYBD_BINDS.lock().unwrap().get(&keybd_key) {
+                if keyboard_key_event.key_state() == KeyState::Released {
+                    if let Some(Bind::NormalBind(cb)) =
+                        KEYBD_RELEASE_BINDS.lock().unwrap().get(&keybd_key)
+                    {
+                        let cb = Arc::clone(cb);
+                        spawn(move || cb());
+                    };
+                } else if keyboard_key_event.key_state() == KeyState::Pressed {
+                    if let Some(Bind::NormalBind(cb)) = KEYBD_BINDS.lock().unwrap().get(&keybd_key)
+                    {
+                        //this simply emits the binding callback event (also this is event multithreaded which is awesome so
+                        // you can do lots of logic in the callback)
                         let cb = Arc::clone(cb);
                         spawn(move || cb());
                     };
@@ -221,7 +257,9 @@ fn handle_input_event(event: Event) {
                 } {
                     if button_event.button_state() == ButtonState::Pressed {
                         BUTTON_STATES.lock().unwrap().insert(mouse_button, true);
-                        if let Some(Bind::NormalBind(cb)) = MOUSE_BINDS.lock().unwrap().get(&mouse_button) {
+                        if let Some(Bind::NormalBind(cb)) =
+                            MOUSE_BINDS.lock().unwrap().get(&mouse_button)
+                        {
                             let cb = Arc::clone(cb);
                             spawn(move || cb());
                         };

@@ -6,9 +6,10 @@ use crate::public::{
 impl From<KeybdKey> for u64 {
     fn from(key: KeybdKey) -> u64 {
         match key {
+            //TODO: thar be bugs:
             BackspaceKey => 0xFF08,
             TabKey => 0xFF09,
-            EnterKey => 0xFF8D,
+            EnterKey => 0xFF0D,
             EscapeKey => 0xFF1B,
             SpaceKey => 0x020,
             HomeKey => 0xFF50,
@@ -66,8 +67,9 @@ impl From<KeybdKey> for u64 {
             MouseKeyDown => 909,
             MouseKeyLowerRight => 910,
             MouseKeyFast => 911,
+            MouseKeySlow => 0xe01c,
             MouseKeyClickToggle => 912,
-            MouseKeyActivate => 913,
+            MouseKeyActivate => 914,
             MouseKeySlash => 915,
 
             Numpad0Key => 0xFFB0,
@@ -116,7 +118,7 @@ impl From<KeybdKey> for u64 {
             RaltKey => 0xFFE9,
             LaltKey => 0xFFEA,
             LWinKey => 0xFFEB,
-            OtherKey(keycode) => keycode,
+            //OtherKey(keycode) => keycode,
         }
     }
 }
@@ -152,17 +154,15 @@ pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
     match scan_code {
         0x0e => Some(BackspaceKey),
         0x0f => Some(TabKey),
-        0x1c => Some(EnterKey),
         0x01 => Some(EscapeKey),
         0x39 => Some(SpaceKey),
-        //NOTE: these can be used instead of custom MouseKey handles in scancodes
-        //0x47 => Some(HomeKey),
+        // 0x47 => Some(HomeKey),
         // 0x4b => Some(LeftKey),
         // 0x48 => Some(UpKey),
         // 0x4d => Some(RightKey),
         // 0x50 => Some(DownKey),
-        //0x52 => Some(InsertKey),
-        //0x53 => Some(DeleteKey),
+        // 0x52 => Some(InsertKey),
+        // 0x53 => Some(DeleteKey),
         0x0b => Some(Numrow0Key),
         0x02 => Some(Numrow1Key),
         0x03 => Some(Numrow2Key),
@@ -219,6 +219,7 @@ pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
         0x50 => Some(MouseKeyDown),
         0x51 => Some(MouseKeyLowerRight),
         0x52 => Some(MouseKeyFast),
+        96 => Some(MouseKeySlow),
         0x53 => Some(MouseKeyClickToggle),
         0x37 => Some(MouseKeyActivate),
         0x35 => Some(MouseKeySlash),
@@ -316,6 +317,7 @@ pub fn key_to_scan_code(key: KeybdKey) -> i32 {
         MouseKeyDown => 0x50,
         MouseKeyLowerRight => 0x51,
         MouseKeyFast => 0x52,
+        MouseKeySlow => 0xe01c,
         MouseKeyClickToggle => 0x53,
         MouseKeyActivate => 0x37,
         MouseKeySlash => 0x35,

@@ -110,6 +110,7 @@ pub enum KeybdKey {
     MouseKeyDown,
     MouseKeyLowerRight,
     MouseKeyFast,
+    MouseKeySlow,
     MouseKeyClickToggle,
     MouseKeyActivate,
     MouseKeySlash,
@@ -143,6 +144,13 @@ impl KeybdKey {
             .unwrap()
             .insert(self, Bind::NormalBind(Arc::new(callback)));
     }
+    pub fn release_bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
+        KEYBD_RELEASE_BINDS
+            .lock()
+            .unwrap()
+            .insert(self, Bind::NormalBind(Arc::new(callback)));
+    }
+
 
     pub fn block_bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
         KEYBD_BINDS
@@ -165,6 +173,12 @@ impl KeybdKey {
 
 impl MouseButton {
     pub fn bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
+        MOUSE_BINDS
+            .lock()
+            .unwrap()
+            .insert(self, Bind::NormalBind(Arc::new(callback)));
+    }
+    pub fn release_bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
         MOUSE_BINDS
             .lock()
             .unwrap()

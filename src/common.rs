@@ -20,4 +20,6 @@ pub type KeybdBindMap = HashMap<KeybdKey, Bind>;
 pub type MouseBindMap = HashMap<MouseButton, Bind>;
 
 pub static KEYBD_BINDS: Lazy<Mutex<KeybdBindMap>> = Lazy::new(|| Mutex::new(KeybdBindMap::new()));
+pub static KEYBD_RELEASE_BINDS: Lazy<Mutex<KeybdBindMap>> = Lazy::new(|| Mutex::new(KeybdBindMap::new()));
+
 pub static MOUSE_BINDS: Lazy<Mutex<MouseBindMap>> = Lazy::new(|| Mutex::new(MouseBindMap::new()));
