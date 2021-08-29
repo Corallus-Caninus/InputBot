@@ -114,6 +114,7 @@ pub enum KeybdKey {
     MouseKeyClickToggle,
     MouseKeyActivate,
     MouseKeySlash,
+    MouseKeyNumlock,
     LAltKey,
     RAltKey,
     LWinKey,

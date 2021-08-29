@@ -36,11 +36,11 @@ static SEND_DISPLAY: Lazy<AtomicPtr<Display>> = Lazy::new(|| {
     unsafe { XInitThreads() };
     AtomicPtr::new(unsafe { XOpenDisplay(null()) })
 });
-static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
+pub static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
     Mutex::new(
         uinput::default()
             .unwrap()
-            .name("test")
+            .name("Rattus")
             .unwrap()
             .event(uinput::event::Keyboard::All)
             .unwrap()
@@ -73,34 +73,33 @@ impl KeybdKey {
     }
 
     pub fn press(self) {
-        KEYBD_DEVICE
-            .lock()
-            .unwrap()
-            .write(0x01, key_to_scan_code(self), 1)
-            .unwrap();
-    }
-    ///press the alternate key for the scancode, usually the right key e.g. right alt
-    pub fn press_right(self) {
-        KEYBD_DEVICE
-            .lock()
-            .unwrap()
-            .write(0xe0, key_to_scan_code(self), 1)
-            .unwrap();
-    }
+        let mut buffer = KEYBD_DEVICE.lock().unwrap();
 
-    pub fn release(self) {
-        KEYBD_DEVICE
-            .lock()
-            .unwrap()
-            .write(0x01, key_to_scan_code(self), 0)
-            .unwrap();
+        buffer.write(0x01, key_to_scan_code(self), 1).unwrap();
+        // buffer.synchronize().unwrap();
     }
-    pub fn release_right(self) {
-        KEYBD_DEVICE
-            .lock()
-            .unwrap()
-            .write(0xe0, key_to_scan_code(self), 0)
-            .unwrap();
+    pub fn release(self) {
+        let mut buffer = KEYBD_DEVICE.lock().unwrap();
+
+        buffer.write(0x01, key_to_scan_code(self), 0).unwrap();
+        // buffer.synchronize().unwrap();
+
+        //TODO: unsure about this part
+        // buffer.write(0x02, key_to_scan_code(self), 1).unwrap();
+        // buffer.synchronize().unwrap();
+        // buffer.write(0x02, key_to_scan_code(self), 0).unwrap();
+        // buffer.synchronize().unwrap();
+    }
+    pub fn click(self, delay: Duration) {
+        let mut buffer = KEYBD_DEVICE.lock().unwrap();
+
+        //buffer.click(&Key{key_to_scan_code(self)});
+        buffer.write(0x01, key_to_scan_code(self), 1).unwrap();
+        buffer.synchronize().unwrap();
+        buffer.write(0x01, key_to_scan_code(self), 0).unwrap();
+        buffer.synchronize().unwrap();
+
+        sleep(delay);
     }
 
     pub fn is_toggled(self) -> bool {
@@ -225,8 +224,11 @@ fn handle_input_event(event: Event) {
         Keyboard(keyboard_event) => {
             let KeyboardEvent::Key(keyboard_key_event) = keyboard_event;
             let key = keyboard_key_event.key();
+            // TODO: X is dropping ins + ent + 1 for some reason,
+            //       verify keypad by sniffing usb
             if let Some(keybd_key) = scan_code_to_key(key) {
                 if keyboard_key_event.key_state() == KeyState::Released {
+                    //print!("{:?} released \n", keybd_key);
                     if let Some(Bind::NormalBind(cb)) =
                         KEYBD_RELEASE_BINDS.lock().unwrap().get(&keybd_key)
                     {
@@ -234,6 +236,7 @@ fn handle_input_event(event: Event) {
                         spawn(move || cb());
                     };
                 } else if keyboard_key_event.key_state() == KeyState::Pressed {
+                    //print!("{:?} pressed \n", keybd_key);
                     if let Some(Bind::NormalBind(cb)) = KEYBD_BINDS.lock().unwrap().get(&keybd_key)
                     {
                         //this simply emits the binding callback event (also this is event multithreaded which is awesome so
