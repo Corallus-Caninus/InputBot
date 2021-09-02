@@ -267,7 +267,7 @@ pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
 }
 
 // https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
-pub fn key_to_scan_code(key: KeybdKey) -> i32 {
+pub fn key_to_scan_code(key: KeybdKey) -> u32 {
     match key {
         BackspaceKey => 0x0e,
         TabKey => 0x0f,
@@ -279,7 +279,7 @@ pub fn key_to_scan_code(key: KeybdKey) -> i32 {
         // LeftKey =>0xcb,
         RightKey => 0x4d,
         UpKey => 0x48,
-        DownKey => 0x50,
+        DownKey =>0x50,
         InsertKey => 0x52,
         DeleteKey => 0x53,
         Numrow0Key => 0x0b,
@@ -361,7 +361,7 @@ pub fn key_to_scan_code(key: KeybdKey) -> i32 {
         LShiftKey => 0x2a,
         RShiftKey => 0x36,
         LControlKey => 0x1d,
-        OtherKey(code) => code as i32,
+        OtherKey(code) => code as u32,
         _ => 0x0,
     }
 }

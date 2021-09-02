@@ -36,11 +36,14 @@ static SEND_DISPLAY: Lazy<AtomicPtr<Display>> = Lazy::new(|| {
     unsafe { XInitThreads() };
     AtomicPtr::new(unsafe { XOpenDisplay(null()) })
 });
+//TODO: this needs to use xtest instead of writting to the device since
+//      buffer locks up on some weird thrashing thing between virtual
+//      devices to /dev/uinput vs lib
 pub static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
     Mutex::new(
         uinput::default()
             .unwrap()
-            .name("Rattus")
+            .name("default")
             .unwrap()
             .event(uinput::event::Keyboard::All)
             .unwrap()
@@ -74,29 +77,40 @@ impl KeybdKey {
 
     pub fn press(self) {
         let mut buffer = KEYBD_DEVICE.lock().unwrap();
-
-        buffer.write(0x01, key_to_scan_code(self), 1).unwrap();
-        // buffer.synchronize().unwrap();
+        buffer
+            .write(0x01, key_to_scan_code(self) as i32, 1)
+            .unwrap();
+        buffer.synchronize().unwrap();
+        // send_key_input(self, 1);
     }
     pub fn release(self) {
+        // send_key_input(self, 0);
+
         let mut buffer = KEYBD_DEVICE.lock().unwrap();
 
-        buffer.write(0x01, key_to_scan_code(self), 0).unwrap();
-        // buffer.synchronize().unwrap();
+        buffer
+            .write(0x01, key_to_scan_code(self) as i32, 0)
+            .unwrap();
+        buffer.synchronize().unwrap();
 
-        //TODO: unsure about this part
         // buffer.write(0x02, key_to_scan_code(self), 1).unwrap();
         // buffer.synchronize().unwrap();
         // buffer.write(0x02, key_to_scan_code(self), 0).unwrap();
         // buffer.synchronize().unwrap();
     }
     pub fn click(self, delay: Duration) {
+        // self.press();
+        // self.release();
         let mut buffer = KEYBD_DEVICE.lock().unwrap();
 
         //buffer.click(&Key{key_to_scan_code(self)});
-        buffer.write(0x01, key_to_scan_code(self), 1).unwrap();
+        buffer
+            .write(0x01, key_to_scan_code(self) as i32, 1)
+            .unwrap();
         buffer.synchronize().unwrap();
-        buffer.write(0x01, key_to_scan_code(self), 0).unwrap();
+        buffer
+            .write(0x01, key_to_scan_code(self) as i32, 0)
+            .unwrap();
         buffer.synchronize().unwrap();
 
         sleep(delay);
@@ -283,6 +297,12 @@ fn get_key_code(code: u64) -> u8 {
 fn send_mouse_input(button: u32, is_press: i32) {
     SEND_DISPLAY.with(|display| unsafe {
         XTestFakeButtonEvent(display, button, is_press, 0);
+    });
+}
+
+fn send_key_input(key: KeybdKey, is_press: i32) {
+    SEND_DISPLAY.with(|display| unsafe {
+        XTestFakeKeyEvent(display, key_to_scan_code(key), is_press, 0);
     });
 }
 
