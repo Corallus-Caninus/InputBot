@@ -15,13 +15,9 @@ use nix::{
     unistd::close,
 };
 use once_cell::sync::Lazy;
+use std::os::raw::{c_char, c_int, c_uint, c_ulong};
 use std::{
-    mem::MaybeUninit,
-    os::{raw::c_char, unix::io::RawFd},
-    path::Path,
-    ptr::null,
-    thread::sleep,
-    time::Duration,
+    mem::MaybeUninit, os::unix::io::RawFd, path::Path, ptr::null, thread::sleep, time::Duration,
 };
 use uinput::event::relative::Position;
 use x11::{xlib::*, xtest::*};
@@ -36,9 +32,11 @@ static SEND_DISPLAY: Lazy<AtomicPtr<Display>> = Lazy::new(|| {
     unsafe { XInitThreads() };
     AtomicPtr::new(unsafe { XOpenDisplay(null()) })
 });
-//TODO: this needs to use xtest instead of writting to the device since
-//      buffer locks up on some weird thrashing thing between virtual
-//      devices to /dev/uinput vs lib
+
+//TODO: this needs to use xtest or x protocol otherwise instead
+//      of writting to the device since seemingly the
+//      buffer locks up on some weird buffer flush with virtual
+//      devices to /dev/uinput
 pub static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
     Mutex::new(
         uinput::default()
@@ -57,7 +55,7 @@ pub static KEYBD_DEVICE: Lazy<Mutex<uinput::Device>> = Lazy::new(|| {
 });
 
 impl KeybdKey {
-    //TODO: misses some right keys 0xe0 xx
+    //TODO: misses some right keys 0xe0 xx @DEPRECATED: test and remove
     pub fn is_pressed(self) -> bool {
         let code = get_key_code(u64::from(self) as _);
         let mut array: [c_char; 32] = [0; 32];
@@ -173,6 +171,33 @@ impl MouseCursor {
         SEND_DISPLAY.with(|display| unsafe {
             XWarpPointer(display, 0, 0, 0, 0, 0, 0, x, y);
         });
+    }
+    pub fn get_pos_abs() -> (i32, i32) {
+        let mut x = 0 as c_int;
+        let mut y = 0 as c_int;
+
+        let mut window_root_return = 0 as c_ulong;
+        let mut window_child_return = 0 as c_ulong;
+        let mut win_x_return = 0 as c_int;
+        let mut win_y_return = 0 as c_int;
+
+        let mut mask_return = 0 as c_uint;
+        let root = unsafe { XDefaultRootWindow(SEND_DISPLAY.with(|display| display)) } as c_ulong;
+
+        SEND_DISPLAY.with(|display| unsafe {
+            XQueryPointer(
+                display,
+                root,
+                &mut window_root_return,
+                &mut window_child_return,
+                &mut x,
+                &mut y,
+                &mut win_x_return,
+                &mut win_y_return,
+                &mut mask_return,
+            );
+        });
+        (x as i32, y as i32)
     }
 }
 
