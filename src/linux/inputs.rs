@@ -152,6 +152,8 @@ impl From<MouseButton> for u32 {
     }
 }
 
+//TODO: this should be a trait so its extensible and I can PR my code with all the
+//      xmodmap values mapped locally
 // https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 pub fn scan_code_to_key(scan_code: u32) -> Option<KeybdKey> {
     match scan_code {
@@ -279,7 +281,7 @@ pub fn key_to_scan_code(key: KeybdKey) -> u32 {
         // LeftKey =>0xcb,
         RightKey => 0x4d,
         UpKey => 0x48,
-        DownKey =>0x50,
+        DownKey => 0x50,
         InsertKey => 0x52,
         DeleteKey => 0x53,
         Numrow0Key => 0x0b,
