@@ -67,6 +67,7 @@ pub enum KeybdKey {
     Numpad8Key,
     Numpad9Key,
     NumpadPlusKey,
+    NumpadDivKey,
     F1Key,
     F2Key,
     F3Key,
