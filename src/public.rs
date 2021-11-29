@@ -117,12 +117,12 @@ pub enum KeybdKey {
     MouseKeyActivate,
     MouseKeySlash,
     MouseKeyNumlock,
-    LAltKey,
-    RAltKey,
-    LWinKey,
-    RWinKey,
-    MenuKey,
-    HelpKey,
+    // LAltKey,
+    // RAltKey,
+    // LWinKey,
+    // RWinKey,
+    // MenuKey,
+    // HelpKey,
     OtherKey(u64),
 }
 
