@@ -67,6 +67,7 @@ impl From<KeybdKey> for u64 {
             NumpadDivKey => 0x6F,
             NumpadPlusKey => 0x6B,
             NumpadDelKey => 0x6E,
+            NumpadEnterKey => 0x0D, //0xB0?
             F1Key => 0x70,
             F2Key => 0x71,
             F3Key => 0x72,
@@ -184,6 +185,7 @@ impl From<u64> for KeybdKey {
             0x6B => NumpadPlusKey,
             0x6F => NumpadDivKey,
             0x6E => NumpadDelKey,
+            0x0D => NumpadEnterKey,
             0x70 => F1Key,
             0x71 => F2Key,
             0x72 => F3Key,
