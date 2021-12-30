@@ -144,6 +144,7 @@ pub struct MouseWheel;
 impl KeybdKey {
     pub fn bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
         KEYBD_BINDS
+            // .lock()
             .lock()
             .unwrap()
             .insert(self, Bind::NormalBind(Arc::new(callback)));
@@ -158,6 +159,7 @@ impl KeybdKey {
 
     pub fn block_bind<F: Fn() + Send + Sync + 'static>(self, callback: F) {
         KEYBD_BINDS
+            // .lock()
             .lock()
             .unwrap()
             .insert(self, Bind::BlockBind(Arc::new(callback)));
@@ -165,6 +167,7 @@ impl KeybdKey {
 
     pub fn blockable_bind<F: Fn() -> BlockInput + Send + Sync + 'static>(self, callback: F) {
         KEYBD_BINDS
+            // .lock()
             .lock()
             .unwrap()
             .insert(self, Bind::BlockableBind(Arc::new(callback)));

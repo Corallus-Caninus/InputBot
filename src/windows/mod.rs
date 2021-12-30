@@ -1,4 +1,5 @@
 use crate::{common::*, public::*};
+use once_cell::sync::Lazy;
 use std::{
     mem::{size_of, transmute_copy, MaybeUninit},
     ptr::null_mut,
@@ -9,7 +10,6 @@ use winapi::{
     shared::{minwindef::*, windef::*},
     um::winuser::*,
 };
-use once_cell::sync::Lazy;
 
 mod inputs;
 
@@ -101,6 +101,54 @@ pub fn handle_input_events() {
     unsafe { GetMessageW(&mut msg, 0 as HWND, 0, 0) };
 }
 
+// unsafe extern "system" fn keybd_proc(code: c_int, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
+//     //NOTE: this is a passthrough for all other events
+//     std::thread::spawn(move || CallNextHookEx(null_mut(), code, w_param, l_param));
+//     // let keybdbinds = KEYBD_BINDS;
+//     // let res = std::thread::spawn(|| {
+//     // if KEYBD_BINDS.lock().unwrap().is_empty() {
+//     //this is now a rwlock so we dont lock
+//     // if KEYBD_BINDS.read().unwrap().is_empty() {
+//     //     unset_hook(&*KEYBD_HHOOK);
+//     // } else
+//     if w_param as u32 == WM_KEYDOWN {
+//         // if let Some(bind) = KEYBD_BINDS
+//         //     .lock()
+//         //     .unwrap()
+//         //     .get_mut(&KeybdKey::from(u64::from(
+//         //         (*(l_param as *const KBDLLHOOKSTRUCT)).vkCode,
+//         //     )))
+//         if let Some(bind) = KEYBD_BINDS
+//             .lock()
+//             .unwrap()
+//             .get_mut(&KeybdKey::from(u64::from(
+//                 (*(l_param as *const KBDLLHOOKSTRUCT)).vkCode,
+//             )))
+//         {
+//             match bind {
+//                 Bind::NormalBind(cb) => {
+//                     // let cb = Arc::clone(*cb.clone());
+//                     spawn(move || cb());
+//                     // return 0;
+//                     // cb();
+//                 }
+//                 Bind::BlockBind(cb) => {
+//                     // let cb = Arc::clone(cb);
+//                     spawn(move || cb());
+//                     // cb();
+//                     return 1 ;
+//                 }
+//                 Bind::BlockableBind(cb) => {
+//                     if let BlockInput::Block = cb() {
+//                         return 1;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     CallNextHookEx(null_mut(), code, w_param, l_param)
+// }
+
 unsafe extern "system" fn keybd_proc(code: c_int, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     if KEYBD_BINDS.lock().unwrap().is_empty() {
         unset_hook(&*KEYBD_HHOOK);
@@ -132,7 +180,6 @@ unsafe extern "system" fn keybd_proc(code: c_int, w_param: WPARAM, l_param: LPAR
     }
     CallNextHookEx(null_mut(), code, w_param, l_param)
 }
-
 unsafe extern "system" fn mouse_proc(code: c_int, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     if MOUSE_BINDS.lock().unwrap().is_empty() {
         unset_hook(&*MOUSE_HHOOK);
@@ -148,7 +195,7 @@ unsafe extern "system" fn mouse_proc(code: c_int, w_param: WPARAM, l_param: LPAR
                 XBUTTON2 => Some(MouseButton::X2Button),
                 _ => None,
             }
-        },
+        }
         _ => None,
     } {
         if let Some(bind) = MOUSE_BINDS.lock().unwrap().get_mut(&event) {
@@ -180,7 +227,8 @@ fn set_hook(
 ) {
     hook_ptr.store(
         unsafe { SetWindowsHookExW(hook_id, Some(hook_proc), 0 as HINSTANCE, 0) },
-        Ordering::Relaxed,
+        // Ordering::Relaxed,
+        Ordering::SeqCst,
     );
 }
 

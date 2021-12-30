@@ -1,11 +1,13 @@
 use crate::public::*;
+use once_cell::sync::Lazy;
 pub use std::{
     collections::hash_map::HashMap,
     sync::atomic::{AtomicPtr, Ordering},
-    sync::{Arc, Mutex},
+    sync::Mutex,
+    //import rwlock
+    sync::{Arc, RwLock},
     thread::spawn,
 };
-use once_cell::sync::Lazy;
 
 pub enum Bind {
     NormalBind(BindHandler),
@@ -19,7 +21,12 @@ pub type BlockableBindHandler = Arc<dyn Fn() -> BlockInput + Send + Sync + 'stat
 pub type KeybdBindMap = HashMap<KeybdKey, Bind>;
 pub type MouseBindMap = HashMap<MouseButton, Bind>;
 
+// pub static KEYBD_BINDS: Lazy<Mutex<KeybdBindMap>> = Lazy::new(|| Mutex::new(KeybdBindMap::new()));
+//same as above but RWLock since only written on init
+// pub static KEYBD_BINDS: Lazy<KeybdBindMap> = Lazy::new(|| KeybdBindMap::new());
+//same as above but with mutable keybdbindmap
 pub static KEYBD_BINDS: Lazy<Mutex<KeybdBindMap>> = Lazy::new(|| Mutex::new(KeybdBindMap::new()));
-pub static KEYBD_RELEASE_BINDS: Lazy<Mutex<KeybdBindMap>> = Lazy::new(|| Mutex::new(KeybdBindMap::new()));
+pub static KEYBD_RELEASE_BINDS: Lazy<Mutex<KeybdBindMap>> =
+    Lazy::new(|| Mutex::new(KeybdBindMap::new()));
 
 pub static MOUSE_BINDS: Lazy<Mutex<MouseBindMap>> = Lazy::new(|| Mutex::new(MouseBindMap::new()));
